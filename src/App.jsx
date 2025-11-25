@@ -27,6 +27,7 @@ function App() {
   const [selectedExtras, setSelectedExtras] = useState({})
   const [newMaterial, setNewMaterial] = useState(createEmptyMaterialForm())
   const [newExtra, setNewExtra] = useState(createEmptyExtraForm())
+  const [printName, setPrintName] = useState('')
   const fileInputRef = useRef(null)
 
   const totals = useMemo(() => {
@@ -56,6 +57,7 @@ function App() {
     const salePrice = vladikaCost * 2.5
     const discountPrice = baseCost * 2.5
     const pieces = Number(piecesPerSession) || 0
+    const netProfit = salePrice - baseCost - extrasTotal
 
     return {
       plasticCost,
@@ -66,6 +68,7 @@ function App() {
       vladikaCost,
       salePrice,
       discountPrice,
+      netProfit,
       perUnitCost: pieces > 0 ? baseCost / pieces : 0,
       perUnitSale: pieces > 0 ? salePrice / pieces : 0,
       perUnitDiscount: pieces > 0 ? discountPrice / pieces : 0,
@@ -213,6 +216,7 @@ function App() {
     time,
     piecesPerSession,
     selectedExtras,
+    printName,
   })
 
   const handleSaveState = () => {
@@ -277,6 +281,7 @@ function App() {
         setSelectedExtras(snapshot.selectedExtras ?? {})
         setNewMaterial(createEmptyMaterialForm())
         setNewExtra(createEmptyExtraForm())
+        setPrintName(snapshot.printName ?? '')
       } catch (error) {
         window.alert(
           `Не удалось загрузить состояние: ${
@@ -303,6 +308,8 @@ function App() {
   return (
     <div className="app">
       <CalculatorHeader
+        printName={printName}
+        onPrintNameChange={setPrintName}
         onSaveState={handleSaveState}
         onLoadState={handleLoadState}
         fileInputRef={fileInputRef}

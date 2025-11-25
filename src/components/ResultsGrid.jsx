@@ -34,6 +34,15 @@ function ResultsGrid({ totals, piecesPerSession }) {
         </article>
 
         <article>
+          <p className="label">Чистая прибыль</p>
+          <strong>{rubFormatter.format(totals.netProfit)}</strong>
+          <p className="hint">
+            Графа 6 − графа 4 − расходники{' '}
+            {rubFormatter.format(totals.extrasTotal)}
+          </p>
+        </article>
+
+        <article>
           <p className="label">Цена со скидкой (7)</p>
           <strong>{rubFormatter.format(totals.discountPrice)}</strong>
           <p className="hint">Графа 4 × 2.5</p>

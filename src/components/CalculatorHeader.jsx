@@ -1,4 +1,6 @@
 function CalculatorHeader({
+  printName,
+  onPrintNameChange,
   onSaveState,
   onLoadState,
   fileInputRef,
@@ -6,12 +8,22 @@ function CalculatorHeader({
 }) {
   return (
     <header className="header">
-      <div>
+      <div className="header-main">
         <h1>Калькулятор печати</h1>
         <p className="subtitle">
           Подбирайте нужное количество цветов пластика, учитывайте время печати
           и расходники. Все формулы из описания уже зашиты в расчёт.
         </p>
+        <div className="field header-field">
+          <label htmlFor="print-name-input">Название печати</label>
+          <input
+            id="print-name-input"
+            type="text"
+            placeholder="Например, заказ #42"
+            value={printName}
+            onChange={(event) => onPrintNameChange(event.target.value)}
+          />
+        </div>
       </div>
       <div className="header-actions">
         <button type="button" onClick={onSaveState}>
