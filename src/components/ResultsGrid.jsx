@@ -30,7 +30,7 @@ function ResultsGrid({ totals, piecesPerSession }) {
         <article>
           <p className="label">Цена на продажу (6)</p>
           <strong>{rubFormatter.format(totals.salePrice)}</strong>
-          <p className="hint">Графа 5 × 2.5</p>
+          <p className="hint">Графа 5 без расходников × 2.5 + расходники</p>
         </article>
 
         <article>

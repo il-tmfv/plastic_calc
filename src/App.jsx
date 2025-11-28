@@ -54,7 +54,8 @@ function App() {
 
     const baseCost = plasticCost + timeCost + extrasTotal
     const vladikaCost = totalWeight * 1.5 + totalHours * 10 + extrasTotal
-    const salePrice = vladikaCost * 2.5
+    const vladikaWithoutExtras = vladikaCost - extrasTotal
+    const salePrice = vladikaWithoutExtras * 2.5 + extrasTotal
     const discountPrice = baseCost * 2.5
     const pieces = Number(piecesPerSession) || 0
     const netProfit = salePrice - baseCost - extrasTotal
