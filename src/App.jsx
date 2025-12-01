@@ -8,7 +8,8 @@ import ProductionParams from './components/ProductionParams'
 import ResultsGrid from './components/ResultsGrid'
 import ReportsPanel from './components/ReportsPanel'
 import { initialExtras, initialMaterials } from './constants/data'
-import { generateId, gramsToKgCost } from './utils/helpers'
+import { generateId } from './utils/helpers'
+import { calculateTotals } from './utils/calculateTotals'
 
 const pad = (value) => String(value).padStart(2, '0')
 const createEmptyMaterialForm = () => ({ name: '', pricePerKg: '' })
@@ -37,51 +38,18 @@ function App() {
   const [printDate, setPrintDate] = useState(() => getTodayDateString())
   const fileInputRef = useRef(null)
 
-  const totals = useMemo(() => {
-    const plasticCost = plasticRows.reduce((sum, row) => {
-      const material = materials.find((mat) => mat.id === row.materialId)
-      return sum + (material ? gramsToKgCost(material.pricePerKg, row.grams) : 0)
-    }, 0)
-
-    const totalWeight = plasticRows.reduce(
-      (sum, row) => sum + (Number(row.grams) || 0),
-      0,
-    )
-
-    const hours = Number(time.hours) || 0
-    const minutes = Number(time.minutes) || 0
-    const totalHours = hours + minutes / 60
-    const timeCost = totalHours * 10
-
-    const extrasTotal = extras.reduce(
-      (sum, extra) =>
-        sum + (selectedExtras[extra.id] ? Number(extra.price) || 0 : 0),
-      0,
-    )
-
-    const baseCost = plasticCost + timeCost + extrasTotal
-    const vladikaCost = totalWeight * 1.5 + totalHours * 10 + extrasTotal
-    const vladikaWithoutExtras = vladikaCost - extrasTotal
-    const salePrice = vladikaWithoutExtras * 2.5 + extrasTotal
-    const discountPrice = baseCost * 2.5
-    const pieces = Number(piecesPerSession) || 0
-    const netProfit = salePrice - baseCost - extrasTotal
-
-    return {
-      plasticCost,
-      totalWeight,
-      totalHours,
-      extrasTotal,
-      baseCost,
-      vladikaCost,
-      salePrice,
-      discountPrice,
-      netProfit,
-      perUnitCost: pieces > 0 ? baseCost / pieces : 0,
-      perUnitSale: pieces > 0 ? salePrice / pieces : 0,
-      perUnitDiscount: pieces > 0 ? discountPrice / pieces : 0,
-    }
-  }, [extras, materials, piecesPerSession, plasticRows, selectedExtras, time])
+  const totals = useMemo(
+    () =>
+      calculateTotals({
+        materials,
+        extras,
+        plasticRows,
+        selectedExtras,
+        time,
+        piecesPerSession,
+      }),
+    [extras, materials, piecesPerSession, plasticRows, selectedExtras, time],
+  )
 
   const handlePlasticChange = (rowId, field, value) => {
     setPlasticRows((rows) =>

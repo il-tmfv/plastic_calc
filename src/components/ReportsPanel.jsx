@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { numberFormatter, rubFormatter } from '../utils/formatters'
-import { gramsToKgCost } from '../utils/helpers'
+import { calculateTotals } from '../utils/calculateTotals'
 
 const formatDate = (input) => {
   if (!input) return null
@@ -18,60 +18,15 @@ const formatDateRangeLabel = (from, to) => {
   return `${from.toLocaleDateString('ru-RU')} — ${to.toLocaleDateString('ru-RU')}`
 }
 
-const isExtraSelected = (selectedExtras, id) => {
-  if (!selectedExtras) return false
-  if (Array.isArray(selectedExtras)) return selectedExtras.includes(id)
-  if (typeof selectedExtras === 'object') {
-    return Boolean(selectedExtras[id])
-  }
-  return false
-}
-
 const calculateSnapshotTotals = (snapshot) => {
-  const materials = Array.isArray(snapshot.materials) ? snapshot.materials : []
-  const extras = Array.isArray(snapshot.extras) ? snapshot.extras : []
-  const plasticRows = Array.isArray(snapshot.plasticRows) ? snapshot.plasticRows : []
-  const materialById = materials.reduce((map, material) => {
-    if (material?.id) {
-      map[material.id] = material
-    }
-    return map
-  }, {})
-
-  const plasticCost = plasticRows.reduce((sum, row) => {
-    const material = row?.materialId ? materialById[row.materialId] : null
-    return sum + (material ? gramsToKgCost(material.pricePerKg, row.grams) : 0)
-  }, 0)
-
-  const totalWeight = plasticRows.reduce((sum, row) => sum + (Number(row?.grams) || 0), 0)
-
-  const hours = Number(snapshot?.time?.hours) || 0
-  const minutes = Number(snapshot?.time?.minutes) || 0
-  const totalHours = hours + minutes / 60
-  const timeCost = totalHours * 10
-
-  const extrasTotal = extras.reduce(
-    (sum, extra) => sum + (isExtraSelected(snapshot.selectedExtras, extra.id) ? Number(extra.price) || 0 : 0),
-    0,
-  )
-
-  const baseCost = plasticCost + timeCost + extrasTotal
-  const vladikaCost = totalWeight * 1.5 + totalHours * 10 + extrasTotal
-  const vladikaWithoutExtras = vladikaCost - extrasTotal
-  const salePrice = vladikaWithoutExtras * 2.5 + extrasTotal
-  const pieces = Number(snapshot?.piecesPerSession) || 0
-  const netProfit = salePrice - baseCost - extrasTotal
-
-  return {
-    totalWeight,
-    totalHours,
-    baseCost,
-    vladikaCost,
-    salePrice,
-    netProfit,
-    extrasTotal,
-    pieces,
-  }
+  return calculateTotals({
+    materials: Array.isArray(snapshot?.materials) ? snapshot.materials : [],
+    extras: Array.isArray(snapshot?.extras) ? snapshot.extras : [],
+    plasticRows: Array.isArray(snapshot?.plasticRows) ? snapshot.plasticRows : [],
+    selectedExtras: snapshot?.selectedExtras,
+    time: snapshot?.time,
+    piecesPerSession: snapshot?.piecesPerSession,
+  })
 }
 
 const parseSnapshotPayload = (raw, fileName) => {
