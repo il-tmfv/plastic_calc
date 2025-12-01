@@ -9,8 +9,13 @@ import ResultsGrid from './components/ResultsGrid'
 import { initialExtras, initialMaterials } from './constants/data'
 import { generateId, gramsToKgCost } from './utils/helpers'
 
+const pad = (value) => String(value).padStart(2, '0')
 const createEmptyMaterialForm = () => ({ name: '', pricePerKg: '' })
 const createEmptyExtraForm = () => ({ name: '', price: '' })
+const getTodayDateString = () => {
+  const now = new Date()
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+}
 
 function App() {
   const [materials, setMaterials] = useState(initialMaterials)
@@ -28,6 +33,7 @@ function App() {
   const [newMaterial, setNewMaterial] = useState(createEmptyMaterialForm())
   const [newExtra, setNewExtra] = useState(createEmptyExtraForm())
   const [printName, setPrintName] = useState('')
+  const [printDate, setPrintDate] = useState(() => getTodayDateString())
   const fileInputRef = useRef(null)
 
   const totals = useMemo(() => {
@@ -200,7 +206,6 @@ function App() {
 
   const getDefaultFileName = () => {
     const now = new Date()
-    const pad = (value) => String(value).padStart(2, '0')
     const yyyy = now.getFullYear()
     const mm = pad(now.getMonth() + 1)
     const dd = pad(now.getDate())
@@ -218,6 +223,7 @@ function App() {
     piecesPerSession,
     selectedExtras,
     printName,
+    printDate,
   })
 
   const handleSaveState = () => {
@@ -283,6 +289,7 @@ function App() {
         setNewMaterial(createEmptyMaterialForm())
         setNewExtra(createEmptyExtraForm())
         setPrintName(snapshot.printName ?? '')
+        setPrintDate(snapshot.printDate ?? getTodayDateString())
       } catch (error) {
         window.alert(
           `Не удалось загрузить состояние: ${
@@ -310,7 +317,9 @@ function App() {
     <div className="app">
       <CalculatorHeader
         printName={printName}
+        printDate={printDate}
         onPrintNameChange={setPrintName}
+        onPrintDateChange={setPrintDate}
         onSaveState={handleSaveState}
         onLoadState={handleLoadState}
         fileInputRef={fileInputRef}

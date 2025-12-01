@@ -31,8 +31,19 @@
   gap: 12px;
 }
 
+.header-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-field {
+  flex: 1 1 220px;
+  max-width: 420px;
+}
+
 .header-field input {
-  width: min(100%, 420px);
+  width: 100%;
 }
 
 .header-actions {
