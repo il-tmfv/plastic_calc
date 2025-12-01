@@ -6,6 +6,7 @@ import ExtrasSelector from './components/ExtrasSelector'
 import PlasticList from './components/PlasticList'
 import ProductionParams from './components/ProductionParams'
 import ResultsGrid from './components/ResultsGrid'
+import ReportsPanel from './components/ReportsPanel'
 import { initialExtras, initialMaterials } from './constants/data'
 import { generateId, gramsToKgCost } from './utils/helpers'
 
@@ -363,6 +364,8 @@ function App() {
         onUpdateExtra={updateExtraField}
         onRemoveExtra={removeExtra}
       />
+
+      <ReportsPanel />
     </div>
   )
 }
