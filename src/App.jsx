@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import CalculatorHeader from './components/CalculatorHeader'
 import CatalogSettings from './components/CatalogSettings'
@@ -14,18 +14,56 @@ import { calculateTotals } from './utils/calculateTotals'
 const pad = (value) => String(value).padStart(2, '0')
 const createEmptyMaterialForm = () => ({ name: '', pricePerKg: '' })
 const createEmptyExtraForm = () => ({ name: '', price: '' })
+const STORAGE_KEY = 'catalogSettings'
 const getTodayDateString = () => {
   const now = new Date()
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 }
 
+const loadCatalogFromStorage = () => {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (!parsed || !Array.isArray(parsed.materials) || !Array.isArray(parsed.extras)) {
+      return null
+    }
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+const persistCatalogToStorage = (materials, extras) => {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        materials,
+        extras,
+      }),
+    )
+  } catch {
+    // ignore persistence errors
+  }
+}
+
 function App() {
-  const [materials, setMaterials] = useState(initialMaterials)
-  const [extras, setExtras] = useState(initialExtras)
+  const initialCatalogRef = useRef(loadCatalogFromStorage() ?? {
+    materials: initialMaterials,
+    extras: initialExtras,
+  })
+
+  const [materials, setMaterials] = useState(
+    () => initialCatalogRef.current.materials,
+  )
+  const [extras, setExtras] = useState(() => initialCatalogRef.current.extras)
   const [plasticRows, setPlasticRows] = useState(() => [
     {
       id: generateId(),
-      materialId: initialMaterials[0]?.id ?? null,
+      materialId: initialCatalogRef.current.materials[0]?.id ?? null,
       grams: '',
     },
   ])
@@ -87,6 +125,10 @@ function App() {
       return next
     })
   }
+
+  useEffect(() => {
+    persistCatalogToStorage(materials, extras)
+  }, [materials, extras])
 
   const updateMaterialField = (id, field, value) => {
     setMaterials((prev) =>
